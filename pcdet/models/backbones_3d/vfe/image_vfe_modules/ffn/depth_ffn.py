@@ -59,6 +59,8 @@ class DepthFFN(nn.Module):
         # Create image feature plane-sweep volume
         frustum_features = self.create_frustum_features(image_features=image_features,
                                                         depth_logits=depth_logits)
+        # for i in range(frustum_features.shape[2]):
+        #     frustum_features[:,:,i,...] = F.interpolate(frustum_features[:,:,i,...], scale_factor=(2,2))
         batch_dict["frustum_features"] = frustum_features
 
         if self.training:
