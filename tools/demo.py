@@ -78,7 +78,7 @@ class DemoImageDataset(DatasetTemplate):
         data_file_list = glob.glob(str(root_path / "images" / f'*{self.ext}')) if self.root_path.is_dir() else [self.root_path]
 
         # data_file_list.sort()
-        random.shuffle(data_file_list)
+        # random.shuffle(data_file_list)
         self.sample_file_list = data_file_list
         self.calib_path = os.path.join(root_path, "parameter.json")
         self.mean = np.array([0.485, 0.456, 0.406], np.float32).reshape(1, 1, 3)
@@ -183,13 +183,15 @@ def main():
             #     ref_scores=pred_dicts[0]['pred_scores'], ref_labels=pred_dicts[0]['pred_labels']
             # )
 
-            V.draw_scenes(ref_boxes=pred_dicts[0]['pred_boxes'],
-                ref_scores=pred_dicts[0]['pred_scores'], ref_labels=pred_dicts[0]['pred_labels']
-            )
-            # img = V.draw_on_image(img, data_dict['calib'][0]["camera_intrinsic"], ref_boxes=pred_dicts[0]['pred_boxes'], ref_labels=pred_dicts[0]['pred_labels'])
+            # V.draw_scenes(ref_boxes=pred_dicts[0]['pred_boxes'],
+            #     ref_scores=pred_dicts[0]['pred_scores'], ref_labels=pred_dicts[0]['pred_labels']
+            # )
+
+            color_dict = {0:[255, 255, 255], 1:[255, 255, 0], 2:[51, 153, 255], 3:[255, 0, 255], 4:[0, 0, 0]} #bgr
+            img = V.draw_one_frame_on_img(img, pred_dicts[0]['pred_boxes'], pred_dicts[0]['pred_labels'], data_dict['calib'][0]["camera_intrinsic"], (0, 255, 255), (255, 0, 255), color_dict, pretty=True)
             cv2.imshow("a",img)
             cv2.waitKey(0)
-            mlab.show(stop=False)
+            # mlab.show(stop=False)
 
 
     logger.info('Demo done.')
