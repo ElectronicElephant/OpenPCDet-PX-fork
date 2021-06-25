@@ -166,6 +166,8 @@ class DatasetTemplate(torch_data.Dataset):
         ret = {}
 
         for key, val in data_dict.items():
+            if "name" in key:
+                continue
             try:
                 if key in ['voxels', 'voxel_num_points']:
                     ret[key] = np.concatenate(val, axis=0)
@@ -175,6 +177,13 @@ class DatasetTemplate(torch_data.Dataset):
                         coor_pad = np.pad(coor, ((0, 0), (1, 0)), mode='constant', constant_values=i)
                         coors.append(coor_pad)
                     ret[key] = np.concatenate(coors, axis=0)
+                elif key in ["gt_names"]:
+                    max_gt = max([len(x) for x in val])
+                    batch_gt_name = np.zeros((batch_size, max_gt), dtype=np.str)
+                    for k in range(batch_size):
+                        batch_gt_name[k, :val[k].__len__()] = val[k]
+                    ret[key] = batch_gt_name
+
                 elif key in ['gt_boxes']:
                     max_gt = max([len(x) for x in val])
                     batch_gt_boxes3d = np.zeros((batch_size, max_gt, val[0].shape[-1]), dtype=np.float32)
@@ -218,6 +227,30 @@ class DatasetTemplate(torch_data.Dataset):
 
                         images.append(image_pad)
                     ret[key] = np.stack(images, axis=0)
+                elif key in ["target"]:
+                    max_boxes = max([len(x["dimensions"]) for x in val])
+                    sub_info = {}
+                    sub_info["hm"] = np.array([x["hm"] for x in val], dtype=np.float32)
+                    sub_info["trans_mat"] = np.array([x["trans_mat"] for x in val], dtype=np.float32)
+                    sub_info["K"] = np.array([x["K"] for x in val], dtype=np.float32)
+                    sub_info["size"] = np.array([x["size"] for x in val], dtype=np.float32)
+
+                    sub_info["reg"] = np.zeros((batch_size, max_boxes, 3, 8), dtype=np.float32)
+                    sub_info["cls_ids"] = np.zeros((batch_size, max_boxes), dtype=np.float32)
+                    sub_info["proj_points"] = np.zeros((batch_size, max_boxes, 2), dtype=np.float32)
+                    sub_info["p_offsets"] = np.zeros((batch_size, max_boxes, 2), dtype=np.float32)
+                    sub_info["dimensions"] = np.zeros((batch_size, max_boxes, 3), dtype=np.float32)
+                    sub_info["locations"] = np.zeros((batch_size, max_boxes, 3), dtype=np.float32)
+                    sub_info["rotys"] = np.zeros((batch_size, max_boxes), dtype=np.float32)
+                    sub_info["reg_mask"] = np.zeros((batch_size, max_boxes), dtype=np.float32)
+                    sub_info["flip_mask"] = np.zeros((batch_size, max_boxes), dtype=np.float32)
+                    key_list = ["reg", "cls_ids", "proj_points", "p_offsets",
+                                "dimensions", "locations", "rotys", "reg_mask", "flip_mask"]
+                    for k in range(batch_size):
+                        for sub_key in key_list:
+                            if val[k][sub_key].size > 0:
+                                sub_info[sub_key][k, :val[k][sub_key].__len__(),...] = val[k][sub_key]
+                    ret[key] = sub_info
                 else:
                     ret[key] = np.stack(val, axis=0)
             except:
