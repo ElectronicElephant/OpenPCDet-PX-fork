@@ -7,9 +7,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
-import kornia
 
+try:
+    from kornia.enhance.normalize import normalize
+except:
+    pass
+    # print('Warning: kornia is not installed. This package is only required by CaDDN')
 
+    
 class DDNTemplate(nn.Module):
 
     def __init__(self, constructor, feat_extract_layer, num_classes, pretrained_path=None, aux_loss=None):
@@ -151,7 +156,7 @@ class DDNTemplate(nn.Module):
             mask = torch.isnan(x)
 
             # Match ResNet pretrained preprocessing
-            x = kornia.normalize(x, mean=self.norm_mean, std=self.norm_std)
+            x = normalize(x, mean=self.norm_mean, std=self.norm_std)
 
             # Make padded pixels = 0
             x[mask] = 0
