@@ -4,5 +4,5 @@ easydict
 pyyaml
 scikit-image
 tqdm
-kornia
+kornia==0.2.2
 torchvision
