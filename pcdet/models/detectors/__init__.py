@@ -6,6 +6,7 @@ from .pv_rcnn import PVRCNN
 from .second_net import SECONDNet
 from .second_net_iou import SECONDNetIoU
 from .caddn import CaDDN
+from .smoke import Smoke
 from .voxel_rcnn import VoxelRCNN
 
 __all__ = {
@@ -17,6 +18,7 @@ __all__ = {
     'PointRCNN': PointRCNN,
     'SECONDNetIoU': SECONDNetIoU,
     'CaDDN': CaDDN,
+    "Smoke": Smoke
     'VoxelRCNN': VoxelRCNN
 }
 

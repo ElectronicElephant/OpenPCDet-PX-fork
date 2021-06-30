@@ -99,7 +99,9 @@ class Detector3DTemplate(nn.Module):
 
         backbone_2d_module = backbones_2d.__all__[self.model_cfg.BACKBONE_2D.NAME](
             model_cfg=self.model_cfg.BACKBONE_2D,
-            input_channels=model_info_dict['num_bev_features']
+            input_channels= self.model_cfg.BACKBONE_2D.INPUT_CHANNELS
+                            if "num_bev_features" not in model_info_dict.keys() else
+                            model_info_dict['num_bev_features']
         )
         model_info_dict['module_list'].append(backbone_2d_module)
         model_info_dict['num_bev_features'] = backbone_2d_module.num_bev_features
@@ -337,11 +339,31 @@ class Detector3DTemplate(nn.Module):
         if 'version' in checkpoint:
             logger.info('==> Checkpoint trained from version: %s' % checkpoint['version'])
 
-        update_model_state = {}
+        msg = 'If you see this, your model does not fully load the ' + \
+              'pre-trained weight. Please make sure ' + \
+              'you have correctly specified --arch xxx ' + \
+              'or set the correct --num_classes for your own dataset.'
+
+        msg_2 = 'If you see this, your model does not fully load the ' + \
+              'pre-trained weight. Please make sure ' + \
+              'you have correctly specified --arch xxx ' + \
+              'or set the correct --num_classes for your own dataset.'
+
+        update_match_key = {}
         for key, val in model_state_disk.items():
+            if key in self.state_dict():
+                update_match_key[key] = val
+            else:
+                print('Skip loading parameter {}, not found in target'.format(key))
+
+        update_model_state = {}
+        for key, val in update_match_key.items():
             if key in self.state_dict() and self.state_dict()[key].shape == model_state_disk[key].shape:
                 update_model_state[key] = val
-                # logger.info('Update weight %s: %s' % (key, str(val.shape)))
+            else:
+                print('Skip loading parameter {}, required shape{}, ' \
+                      'loaded shape{}. {}'.format(
+                    key, model_state_disk[key].shape, self.state_dict()[key].shape, msg))
 
         state_dict = self.state_dict()
         state_dict.update(update_model_state)
