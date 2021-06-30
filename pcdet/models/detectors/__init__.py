@@ -18,7 +18,7 @@ __all__ = {
     'PointRCNN': PointRCNN,
     'SECONDNetIoU': SECONDNetIoU,
     'CaDDN': CaDDN,
-    "Smoke": Smoke
+    "Smoke": Smoke,
     'VoxelRCNN': VoxelRCNN
 }
 
