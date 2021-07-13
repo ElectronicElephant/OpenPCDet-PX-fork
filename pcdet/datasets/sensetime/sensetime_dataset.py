@@ -243,6 +243,11 @@ class SenseDataset(DatasetTemplate):
             input_dict['depth_maps'] = self.get_depth_map(sample_idx)
 
         input_dict['image_shape'] = img_shape
+        input_dict.pop('pry_ZYX')
+        input_dict.pop('location')
+        input_dict.pop('dimensions')
+        input_dict.pop('rotation_y')
+        input_dict.pop('label')
         return input_dict
 
 
